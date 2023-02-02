@@ -1,10 +1,60 @@
-    ---
-    title: "Florida Keys Dash v1"
-    author: "Dan Otis"
-    date: "2/2/2023"
-    format: 
-      html:
-        code-fold: true
-    ---
+---
+title: "Florida Keys Data Dash"
+author: "USF IMaRS"
+date: "3/2/2023"
+format: html
+---
 
-\## Florida Keys Data Dashboard
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+# whatever is in this chunk gets run before any other chunk
+# install.packages("rerddap")
+# install.packages("plotdap")
+# install.packages("mapdata")
+# put your libary loading here:
+library("rerddap")
+library("mapdata")
+library("plotdap")
+
+```
+
+```{r check rerrdap is installed by printing version}
+# rerddap::version()
+# rerddap::servers()  # list of "default" servers
+# to select a single ERDDAP server to use:
+database <- "http://131.247.136.200:8080/erddap/"
+# database <- "https://upwell.pfeg.noaa.gov/erddap/"
+Sys.setenv(RERDDAP_DEFAULT_URL = database)
+# this is required when using servers not listed by rerddap::servers()
+```
+
+```{r rerddap griddap usage}
+# LAT <- c(23.0, 27.0)
+# LON <- c(-84.0, -80.0)
+TIME <- c("2017-01-01", "2017-01-02")
+DATASET_ID <- "moda_oc_7d_fk"
+# These are MODA 7D mean files for the FK dashboard
+dataset_result <- rerddap::griddap(
+    DATASET_ID,
+    # latitude = LAT, 
+    # longitude = LON, 
+    time = TIME, 
+    fields = 'chlor_a_anom',
+    fmt = "nc"  # (optional) tells to download as .csv instead of .nc
+)
+
+# w <- map("worldHires", xlim = c(-85.0, -78.5), ylim = c(23.0, 27.0), 
+#         fill = TRUE, plot = FALSE)
+# map using that outline,  temperature color from cmocean
+# add_griddap(plotdap(mapData = w), dataset_result, ~chlor_a_anom, fill = "algae",maxpixels = 50000 )
+
+plotdap(mapTitle = "Chlorophyll-a Anomaly") %>%
+    add_griddap(
+      dataset_result, 
+      ~chlor_a_anom, 
+      fill = "algae",  
+      maxpixels = 1000000
+      ) %>%
+print(landmask = TRUE)
+
+```
