@@ -27,11 +27,16 @@ library("readr")
 ```
 
 ```{r}
-roi <- "FK"
-site <- read_csv("ROI_INFO.csv", col_types=cols()) %>%
-  filter(id == roi)
+source(here::here("scripts/functions.R")) # Wut?
+if (!exists("params")) 
+  params <- list(
+  roi_id   = "FK")
+site <- read_csv(here("data/sites.csv"), col_types=cols()) %>%
+  filter(id == params$roi_id)
+sst4   <- info('moda_sst4_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
+chl   <- info('moda_oc_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
+# scape <- info("noaa_aoml_4729_9ee6_ab54", url = "https://cwcgom.aoml.noaa.gov/erddap/")
 ```
-
 
 ```{r}
 get_dates <- function(info){
