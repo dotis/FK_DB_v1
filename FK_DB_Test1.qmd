@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = FALSE)
 # install.packages("stringr")
 # install.packages("dplyr")
 # install.packages("readr")
+# install.packages("here")
 # put your libary loading here:
 library("rerddap")
 library("mapdata")
@@ -24,10 +25,11 @@ library("stringr")
 library("dplyr")
 library("leafem")
 library("readr")
+library("here")
 ```
 
 ```{r}
-source(here::here("scripts/functions.R")) # Wut?
+source(here::here("scripts/functions.R"), local = FALSE) # Wut?
 if (!exists("params")) 
   params <- list(
   roi_id   = "FK")
