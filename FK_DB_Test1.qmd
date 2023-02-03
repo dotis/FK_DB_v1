@@ -24,12 +24,6 @@ library("dplyr")
 library("leafem")
 ```
 
-
-
-
-
-
-
 ```{r}
 get_dates <- function(info){
   info$alldata$time %>%
@@ -71,7 +65,6 @@ addLegend(
     colorNumeric("Spectral", c(0,4), reverse=T), seq(4,0))
 ```
 
-
 ```{r}
 # box_2 <- get_box(site$lon, site$lat, cells_wide=10)
 # r_2   <- get_raster(chl, lon=box$lon, lat=box$lat, date="last", field="chl")
@@ -99,52 +92,6 @@ leaflet(
     colorNumeric("Spectral", c(0,4), reverse=T), seq(0,4))
 ```
 
+# `{r check rerrdap is installed by printing version} # # rerddap::version() # # rerddap::servers()  # list of "default" servers # # to select a single ERDDAP server to use: # database <- "http://131.247.136.200:8080/erddap/" # # database <- "https://upwell.pfeg.noaa.gov/erddap/" # Sys.setenv(RERDDAP_DEFAULT_URL = database) # # this is required when using servers not listed by rerddap::servers() #`
 
-
-
-
-
-
-
-
-
-# ```{r check rerrdap is installed by printing version}
-# # rerddap::version()
-# # rerddap::servers()  # list of "default" servers
-# # to select a single ERDDAP server to use:
-# database <- "http://131.247.136.200:8080/erddap/"
-# # database <- "https://upwell.pfeg.noaa.gov/erddap/"
-# Sys.setenv(RERDDAP_DEFAULT_URL = database)
-# # this is required when using servers not listed by rerddap::servers()
-# ```
-
-# ```{r rerddap griddap usage}
-# # LAT <- c(23.0, 27.0)
-# # LON <- c(-84.0, -80.0)
-# TIME <- c("2017-01-01", "2017-01-02")
-# DATASET_ID <- "moda_oc_7d_fk"
-# # These are MODA 7D mean files for the FK dashboard
-# dataset_result <- rerddap::griddap(
-#     DATASET_ID,
-#     # latitude = LAT, 
-#     # longitude = LON, 
-#     time = TIME, 
-#     fields = 'chlor_a_anom',
-#     fmt = "nc"  # (optional) tells to download as .csv instead of .nc
-# )
-# 
-# # w <- map("worldHires", xlim = c(-85.0, -78.5), ylim = c(23.0, 27.0), 
-# #         fill = TRUE, plot = FALSE)
-# # map using that outline,  temperature color from cmocean
-# # add_griddap(plotdap(mapData = w), dataset_result, ~chlor_a_anom, fill = "algae",maxpixels = 50000 )
-# 
-# plotdap(mapTitle = "Chlorophyll-a Anomaly") %>%
-#     add_griddap(
-#       dataset_result, 
-#       ~chlor_a_anom, 
-#       fill = "algae",  
-#       maxpixels = 1000000
-#       ) %>%
-# print(landmask = TRUE)
-# 
-# ```
+# `{r rerddap griddap usage} # # LAT <- c(23.0, 27.0) # # LON <- c(-84.0, -80.0) # TIME <- c("2017-01-01", "2017-01-02") # DATASET_ID <- "moda_oc_7d_fk" # # These are MODA 7D mean files for the FK dashboard # dataset_result <- rerddap::griddap( #     DATASET_ID, #     # latitude = LAT,  #     # longitude = LON,  #     time = TIME,  #     fields = 'chlor_a_anom', #     fmt = "nc"  # (optional) tells to download as .csv instead of .nc # ) #  # # w <- map("worldHires", xlim = c(-85.0, -78.5), ylim = c(23.0, 27.0),  # #         fill = TRUE, plot = FALSE) # # map using that outline,  temperature color from cmocean # # add_griddap(plotdap(mapData = w), dataset_result, ~chlor_a_anom, fill = "algae",maxpixels = 50000 ) #  # plotdap(mapTitle = "Chlorophyll-a Anomaly") %>% #     add_griddap( #       dataset_result,  #       ~chlor_a_anom,  #       fill = "algae",   #       maxpixels = 1000000 #       ) %>% # print(landmask = TRUE) #  #`
