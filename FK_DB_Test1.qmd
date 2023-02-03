@@ -33,14 +33,13 @@ library("here")
 # roi   = "FKNMS"
 # Set Bounds
 # site <- read_csv("data/ROI_INFO.csv", col_types=cols())   # Pull ROI bounds from file. Define manually for now.
-slat <- 24; nlat <- 26; wlon <- -83.5; elon <- -78.5
+slat <- 24.5; nlat <- 25; wlon <- -83.5; elon <- -78.5
+time_tmp <- "2018-08-01"
 
 sst4   <- info('moda_sst4_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
 chl   <- info('moda_oc_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
 # scape <- info("noaa_aoml_4729_9ee6_ab54", url = "https://cwcgom.aoml.noaa.gov/erddap/")
-```
 
-```{r}
 get_dates <- function(info){
   info$alldata$time %>%
     filter(attribute_name=="actual_range") %>%
@@ -49,16 +48,7 @@ get_dates <- function(info){
     as.numeric() %>%
     as.POSIXct(origin = "1970-01-01", tz = "GMT")
 }
-
-sst4   <- info('moda_sst4_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
-chl   <- info('moda_oc_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
-
-# box_2 <- get_box(site$lon, site$lat, cells_wide=10)
-# r_2   <- get_raster(chl, lon=box$lon, lat=box$lat, date="last", field="chl")
-# d_2 <- get_dates(chl)[2]
-# map_raster(r, site_lon=site$lon, site_lat=site$lat, site_label=site$name, title="CHL")
-# bounding box offset around site marker for extent of map
-# b_2 <- 3.0
+# Leaflet map
 leaflet(options = leafletOptions(crs = leafletCRS(crsClass = "L.CRS.EPSG4326"))) %>%
   # basemap from GBIF in 4326
   addTiles("//tile.gbif.org/4326/omt/{z}/{x}/{y}@1x.png?style=gbif-geyser") %>%
@@ -67,45 +57,41 @@ leaflet(options = leafletOptions(crs = leafletCRS(crsClass = "L.CRS.EPSG4326")))
     baseUrl = 'http://131.247.136.200:8080/erddap/wms/moda_oc_7d_fk/request?',
     layers = "moda_oc_7d_fk:chlor_a_median",
     options = WMSTileOptions(
-      version = "1.3.0", format = "image/png", transparent = T, opacity = 0.7,)) %>%
- #    time = format(d_2,"%Y-%m-%dT00:00:00Z")))  %>% Use this to pull dates from somewhere else
-time = "2018-08-01T00:00:00Z" %>%
-# addMarkers(lng = ~lon, lat = ~lat, label = ~name, data=site) %>%
-# addMouseCoordinates(map, style = c("detailed", "basic"), epsg = NULL,
-#  proj4string = NULL, native.crs = FALSE) %>%
-#   fitBounds(site$lon - b_2, site$lat - b_2, site$lon + b_2, site$lat + b_2) %>% iterative bounds here
-fitBounds(-85.0, 23.0, -78.5, 27.4) %>%
-addLegend(
-    position="bottomright",
-    title = paste0("CHL (mg m^-3)<br>", format(time,"%Y-%m-%d")),
-    colorNumeric("Spectral", c(0,4), reverse=T), seq(4,0))
+      version = "1.3.0", format = "image/png", transparent = T, opacity = 0.7,
+      time = "2018-08-01T00:00:00Z")) %>% 
+  # addMarkers(lng = ~lon, lat = ~lat, label = ~name, data=site) %>%
+  # addMouseCoordinates() %>%
+ fitBounds(wlon, slat, elon, nlat) 
+ # fitBounds(-83.5, 24.0, -78.5, 26.0)
+    # addLegend(
+    # position="bottomright",
+    # title = paste0("SST (°C)<br>", format(d,"%Y-%m-%d")),
+    # colorNumeric("Spectral", c(0,32), reverse=T), seq(0,32))
+
+
+
+
+
+
+
+
+
+# fitBounds(wlon, slat, elon, nlat) %>%
+ 
+#     time <- format(time_tmp,"%Y-%m-%dT00:00:00Z"))) # Use this to pull dates from somewhere else
+
+#fitBounds(wlon, slat, elon, nlat) 
+#fitBounds(-83.5,24.0,-78.5,26.0)
+ 
+# addLegend(
+#     position="bottomright",
+#     title = paste0("CHL (mg m^-3)<br>", format(time,"%Y-%m-%d")),
+#     colorNumeric("Spectral", c(0,4), reverse=T), seq(4,0))
+
+
 ```
 
-```{r}
-# box_2 <- get_box(site$lon, site$lat, cells_wide=10)
-# r_2   <- get_raster(chl, lon=box$lon, lat=box$lat, date="last", field="chl")
-# map_raster(r, site_lon=site$lon, site_lat=site$lat, site_label=site$name, title="CHL")
-# bounding box offset around site marker for extent of map
-b_2 <- 3.0
-leaflet(
-  options = leafletOptions(
-    crs = leafletCRS(crsClass = "L.CRS.EPSG4326"))) %>%
-  # basemap from GBIF in 4326
-  addTiles("//tile.gbif.org/4326/omt/{z}/{x}/{y}@1x.png?style=gbif-geyser") %>%
-  # sst
-  addWMSTiles(
-    baseUrl = 'http://131.247.136.200:8080/erddap/wms/moda_oc_7d_fk/request?',
-    layers = 'moda_oc_7d_fk:chlor_a_median',
-    options = WMSTileOptions(
-      version = "1.3.0", format = "image/png", transparent = T, opacity = 0.7,
-      time = '2018-08-01T00:00:00Z'))  %>%
-  addMarkers(lng = ~lon, lat = ~lat, label = ~name, data=site) %>%
-  addMouseCoordinates() %>%
-  fitBounds(site$lon - b_2, site$lat - b_2, site$lon + b_2, site$lat + b_2) %>%
-  addLegend(
-    position="bottomright",
-    title = paste0("CHL (mg m^-3)<br>", format(d_2,"%Y-%m-%d")),
-    colorNumeric("Spectral", c(0,4), reverse=T), seq(0,4))
-```
+
+
 
 
