@@ -3,6 +3,7 @@ title: "Florida Keys Data Dash"
 author: "USF IMaRS"
 date: "2/3/2023"
 format: html
+output: flexdashboard::flex_dashboard
 ---
 
 ```{r setup, include=FALSE}
@@ -32,17 +33,16 @@ library("flexdashboard")
 
 ```{r}
 # source(here::here("scripts/functions.R")) 
-dashboard   = "FKNMS"
-# Set Bounds
+dashboard <- "FKNMS"
+# Set Bounds from "ROI_INFO.csv" (can add other columns)
 site <- read_csv("data/ROI_INFO.csv", col_types=cols()) %>%  # Pull ROI bounds from file.
 filter(grepl(dashboard, ROI))
+slat <- site$slat; nlat <- site$nlat ; wlon <- site$wlon; elon <- site$elon
 
-# slat <- 24.0; nlat <- 26; wlon <- -83.0; elon <- -80.0
-
-date_tmp <- "2017-01-01"
-
+# L3 Ocean Color from IMaRS (ERDDAP)
 sst4   <- info('moda_sst4_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
 chl   <- info('moda_oc_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
+# Seascapes from AOML Coastwatch (ERDDAP)
 # scape <- info("noaa_aoml_4729_9ee6_ab54", url = "https://cwcgom.aoml.noaa.gov/erddap/")
 
 get_dates <- function(info){
@@ -72,6 +72,7 @@ fitBounds(wlon, slat, elon, nlat) %>%
     position="bottomright",
     title = paste0("CHLa (mg m^-3)<br>", date_tmp),
     colorNumeric("Spectral", c(0,30), reverse=T), seq(0,30))
+
 
 # Leaflet map
 leaflet(options = leafletOptions(crs = leafletCRS(crsClass = "L.CRS.EPSG4326"))) %>%
