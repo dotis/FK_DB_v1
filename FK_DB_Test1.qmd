@@ -3,7 +3,6 @@ title: "Florida Keys Data Dash"
 author: "USF IMaRS"
 date: "2/3/2023"
 format: html
-output: flexdashboard::flex_dashboard
 ---
 
 ```{r setup, include=FALSE}
@@ -37,13 +36,17 @@ dashboard <- "FKNMS"
 # Set Bounds from "ROI_INFO.csv" (can add other columns)
 site <- read_csv("data/ROI_INFO.csv", col_types=cols()) %>%  # Pull ROI bounds from file.
 filter(grepl(dashboard, ROI))
-slat <- site$slat; nlat <- site$nlat ; wlon <- site$wlon; elon <- site$elon
+# slat <- site$slat; nlat <- site$nlat ; wlon <- site$wlon; elon <- site$elon
+# For some reason, bounds don't set exactly right. Some sort of buffer? Depends on view/render?
+# Set manually for now
+slat <- 24; nlat <- 26 ; wlon <- -83; elon <- -79.5
+date_tmp <- '2017-01-01'
 
 # L3 Ocean Color from IMaRS (ERDDAP)
 sst4   <- info('moda_sst4_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
 chl   <- info('moda_oc_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
 # Seascapes from AOML Coastwatch (ERDDAP)
-# scape <- info("noaa_aoml_4729_9ee6_ab54", url = "https://cwcgom.aoml.noaa.gov/erddap/")
+#  scape <- info("noaa_aoml_4729_9ee6_ab54", url = "https://cwcgom.aoml.noaa.gov/erddap/")
 
 get_dates <- function(info){
   info$alldata$time %>%
@@ -53,7 +56,15 @@ get_dates <- function(info){
     as.numeric() %>%
     as.POSIXct(origin = "1970-01-01", tz = "GMT")
 }
-#| layout: [[1,1], [1]]
+
+# get most recent date
+d <- get_dates(chl)[2]
+
+```
+::: {.panel-tabset}
+
+## Chlorophyll-a
+```{r}
 # Leaflet map
 leaflet(options = leafletOptions(crs = leafletCRS(crsClass = "L.CRS.EPSG4326"))) %>%
   # basemap from GBIF in 4326
@@ -65,55 +76,37 @@ leaflet(options = leafletOptions(crs = leafletCRS(crsClass = "L.CRS.EPSG4326")))
     options = WMSTileOptions(
       version = "1.3.0", format = "image/png", transparent = T, opacity = 0.7,
       time = "2023-01-07T00:00:00Z")) %>% 
+  # Add Markers if needed
   # addMarkers(lng = ~lon, lat = ~lat, label = ~name, data=site) %>%
   addMouseCoordinates() %>%
-fitBounds(wlon, slat, elon, nlat) %>%
+fitBounds(wlon, slat, elon, nlat) %>% # Can render past bounds depending on browser window
  addLegend(
     position="bottomright",
     title = paste0("CHLa (mg m^-3)<br>", date_tmp),
     colorNumeric("Spectral", c(0,30), reverse=T), seq(0,30))
-
-
-# Leaflet map
-leaflet(options = leafletOptions(crs = leafletCRS(crsClass = "L.CRS.EPSG4326"))) %>%
-  # basemap from GBIF in 4326
-  addTiles("//tile.gbif.org/4326/omt/{z}/{x}/{y}@1x.png?style=gbif-geyser") %>%
-  # Call to IMaRS ERDDAP (chlor_a)
-  addWMSTiles(
-    baseUrl = 'http://131.247.136.200:8080/erddap/wms/moda_oc_7d_fk/request?',
-    layers = "moda_oc_7d_fk:chlor_a_median",
-    options = WMSTileOptions(
-      version = "1.3.0", format = "image/png", transparent = T, opacity = 0.7,
-      time = "2022-09-02T00:00:00Z")) %>% 
-  # addMarkers(lng = ~lon, lat = ~lat, label = ~name, data=site) %>%
-  addMouseCoordinates() %>%
-fitBounds(wlon, slat, elon, nlat) %>%
- addLegend(
-    position="bottomright",
-    title = paste0("CHLa (mg m^-3)<br>", date_tmp),
-    colorNumeric("Spectral", c(0,30), reverse=T), seq(0,30))
-
-
-
-
-
-
-
-# fitBounds(wlon, slat, elon, nlat) %>%
- 
-#     time <- format(time_tmp,"%Y-%m-%dT00:00:00Z"))) # Use this to pull dates from somewhere else
-
-#fitBounds(wlon, slat, elon, nlat) 
-#fitBounds(-83.5,24.0,-78.5,26.0)
- 
-# addLegend(
-#     position="bottomright",
-#     title = paste0("CHL (mg m^-3)<br>", format(time,"%Y-%m-%d")),
-#     colorNumeric("Spectral", c(0,4), reverse=T), seq(4,0))
-
-
 ```
-
+## SST
+```{r}
+ # Leaflet map
+ leaflet(options = leafletOptions(crs = leafletCRS(crsClass = "L.CRS.EPSG4326"))) %>%
+   # basemap from GBIF in 4326
+   addTiles("//tile.gbif.org/4326/omt/{z}/{x}/{y}@1x.png?style=gbif-geyser") %>%
+   # Call to IMaRS ERDDAP (chlor_a)
+   addWMSTiles(
+     baseUrl = 'http://131.247.136.200:8080/erddap/wms/moda_sst4_7d_fk/request?',
+     layers = "moda_sst4_7d_fk:sst4_median",
+     options = WMSTileOptions(
+       version = "1.3.0", format = "image/png", transparent = T, opacity = 0.7,
+       time = "2022-09-02T00:00:00Z")) %>%
+   # addMarkers(lng = ~lon, lat = ~lat, label = ~name, data=site) %>%
+   addMouseCoordinates() %>%
+ fitBounds(wlon, slat, elon, nlat) %>%
+  addLegend(
+     position="bottomright",
+     title = paste0("SST (DegC)<br>", date_tmp),
+     colorNumeric("Spectral", c(0,30), reverse=T), seq(0,30))
+```
+:::
 
 
 
