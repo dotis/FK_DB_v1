@@ -16,6 +16,7 @@ knitr::opts_chunk$set(echo = FALSE)
 # install.packages("dplyr")
 # install.packages("readr")
 # install.packages("here")
+# install.packages("flexdashboard")
 # put your libary loading here:
 library("rerddap")
 library("mapdata")
@@ -26,14 +27,18 @@ library("dplyr")
 library("leafem")
 library("readr")
 library("here")
+library("flexdashboard")
 ```
 
 ```{r}
 # source(here::here("scripts/functions.R")) 
-# roi   = "FKNMS"
+dashboard   = "FKNMS"
 # Set Bounds
-# site <- read_csv("data/ROI_INFO.csv", col_types=cols())   # Pull ROI bounds from file. Define manually for now.
-slat <- 24.0; nlat <- 26; wlon <- -83.0; elon <- -80.0
+site <- read_csv("data/ROI_INFO.csv", col_types=cols()) %>%  # Pull ROI bounds from file.
+filter(grepl(dashboard, ROI))
+
+# slat <- 24.0; nlat <- 26; wlon <- -83.0; elon <- -80.0
+
 date_tmp <- "2017-01-01"
 
 sst4   <- info('moda_sst4_7d_fk'         , url = "http://131.247.136.200:8080/erddap/")
@@ -48,6 +53,7 @@ get_dates <- function(info){
     as.numeric() %>%
     as.POSIXct(origin = "1970-01-01", tz = "GMT")
 }
+#| layout: [[1,1], [1]]
 # Leaflet map
 leaflet(options = leafletOptions(crs = leafletCRS(crsClass = "L.CRS.EPSG4326"))) %>%
   # basemap from GBIF in 4326
@@ -67,7 +73,24 @@ fitBounds(wlon, slat, elon, nlat) %>%
     title = paste0("CHLa (mg m^-3)<br>", date_tmp),
     colorNumeric("Spectral", c(0,30), reverse=T), seq(0,30))
 
-
+# Leaflet map
+leaflet(options = leafletOptions(crs = leafletCRS(crsClass = "L.CRS.EPSG4326"))) %>%
+  # basemap from GBIF in 4326
+  addTiles("//tile.gbif.org/4326/omt/{z}/{x}/{y}@1x.png?style=gbif-geyser") %>%
+  # Call to IMaRS ERDDAP (chlor_a)
+  addWMSTiles(
+    baseUrl = 'http://131.247.136.200:8080/erddap/wms/moda_oc_7d_fk/request?',
+    layers = "moda_oc_7d_fk:chlor_a_median",
+    options = WMSTileOptions(
+      version = "1.3.0", format = "image/png", transparent = T, opacity = 0.7,
+      time = "2022-09-02T00:00:00Z")) %>% 
+  # addMarkers(lng = ~lon, lat = ~lat, label = ~name, data=site) %>%
+  addMouseCoordinates() %>%
+fitBounds(wlon, slat, elon, nlat) %>%
+ addLegend(
+    position="bottomright",
+    title = paste0("CHLa (mg m^-3)<br>", date_tmp),
+    colorNumeric("Spectral", c(0,30), reverse=T), seq(0,30))
 
 
 
