@@ -39,6 +39,7 @@ filter(grepl(dashboard, ROI))
 # slat <- site$slat; nlat <- site$nlat ; wlon <- site$wlon; elon <- site$elon
 # For some reason, bounds don't set exactly right. Some sort of buffer? Depends on view/render?
 # Set manually for now
+# Could pull ERDDAP data from all of GoM instead and just zoom to ROI.
 slat <- 24; nlat <- 26 ; wlon <- -83; elon <- -79.5
 date_tmp <- '2017-01-01'
 
